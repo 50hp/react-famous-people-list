@@ -2,21 +2,15 @@ import React, { useState } from 'react';
 import './FamousSection.css';
 import axios from 'axios';
 import {useEffect} from 'react';
+import FamousList from './personcomponents/FamousPersonList.jsx';
+import AddPerson from './personcomponents/FamousPersonForm.jsx';
 
 
 
 
 function FamousSection() {
 
-    let [famousPersonName, setPersonName] = useState('');
-    let [famousPersonRole, setPersonRole] = useState('');
     let [famousPeopleArray, setPeopleArray] = useState([]);
-    
-
-    useEffect(() => {
-        fetchPeople();
-
-    }, [])
 
     const fetchPeople = () => {
         // TODO: fetch the list of people from the server
@@ -25,7 +19,6 @@ function FamousSection() {
             url: '/people',
         }).then( (response) => {
             setPeopleArray(response.data);
-            console.log(response)
             console.log(response.data)
         }).catch( (error) => {
             console.log(error)
@@ -33,51 +26,37 @@ function FamousSection() {
 
     }
 
-  const addPerson = (evt) => {
-   
-    evt.preventDefault();
-    console.log(`The person is ${famousPersonName} and they're famous for ${famousPersonRole}`);
+    const postPerson = (newPerson) => {
 
+        console.log(newPerson);
 
-    axios({
-        method: 'POST',
-        url: '/people',
-        data: {
-            name:famousPersonName,
-            role:famousPersonRole
-        }
-    }).then( response => {
-        console.log('success')
-        fetchPeople();
-        setPersonName('');
-        setPersonRole('');
-    }).catch( err => {
-        console.log(err);
-    });
-    
-  }
+        axios({
+            method: 'POST',
+            url: '/people',
+            data: newPerson
+        }).then( response => {
+            console.log('success')
+            fetchPeople();
+        }).catch( err => {
+            console.log(err);
+        });
+
+    }
+
+      useEffect( () => {
+      fetchPeople();
+      }, [])
 
     return (
       <section className="new-person-section">
-        <form onSubmit={addPerson}>
-          <label htmlFor="name-input">Name:</label>
-          <input id="name-input" 
-                 value = {famousPersonName}
-                 onChange={e => setPersonName(e.target.value)} />
-          <label htmlFor="role-input">Famous for:</label>
-          <input id="role-input"
-                 value = {famousPersonRole}
-                 onChange={e => setPersonRole(e.target.value)} />
-          <button type="submit">Done</button>
-        </form>
-        <p>
-          {famousPersonName} is famous for "{famousPersonRole}".
-        </p>
-        <ul>
-          { famousPeopleArray.map(person =>
-            (<li key={person.id}>{person.name} is famous for {person.role}</li>)
-          )}
-        </ul>
+    
+        <AddPerson
+            postPerson={postPerson}
+        />
+        <FamousList
+            famousPeopleArray={famousPeopleArray}
+        />
+
       </section>
     );
 }
